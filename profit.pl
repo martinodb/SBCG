@@ -5,6 +5,11 @@
 % modified:  23 Mar 94, 12 Jun 94 
 % note:      this version for Sicstus Prolog (updated by Mats Carlson; 2017)
 
+% martinodb
+:- expects_dialect(sicstus).
+% :- expects_dialect(sicstus4).
+% end martinodb
+
 
 :- module(profit,[
           portray/1,
@@ -38,9 +43,11 @@ no_style_check(single_var) :-
 	prolog_flag(single_var_warnings,_,off).
 
 %file_exists(Filename) :-  unix(access(Filename,0)).
-:- use_module(library(system3), [
-	file_exists/1
-	]).
+
+% martinodb
+% :- use_module(library(sicstus_system), [file_exists/1]).
+% end martinodb
+
 
 save_program2(A,_) :- save_program(A).
 
@@ -837,8 +844,8 @@ search_feat(X,Type,Feature,Val,ValType,_,_) :-
 
 search_feat(X,Type,Feat,Val,ValType,PAcc,TAcc) :-
     recorded(sig,attval(AnyFeat,Type,X,FeatVal,ResType),_),
-    nonmember(AnyFeat,PAcc),   % don't go through the same feature twice
-    nonmember(ResType,TAcc),   % don't go through the same type twice
+    \+ member(AnyFeat,PAcc),   % don't go through the same feature twice
+    \+ member(ResType,TAcc),   % don't go through the same type twice
     search_feat(FeatVal,ResType,Feat,Val,ValType,[AnyFeat|PAcc],[ResType|TAcc]).
 
 sort_checking(New) :-          % to do: error msg if New is illegal
@@ -973,9 +980,9 @@ reload(Filename) :-
 reload(FileSpec) :-
 	atom_concat(FileSpec, '.mas', MasFileSpec),
 	atom_concat(FileSpec, '.fit.mas', MasFitFileSpec),
-        (  file_exists(MasFitFileSpec) ->
+        (  exists_file(MasFitFileSpec) ->
            compile(MasFitFileSpec)
-        ;  file_exists(MasFileSpec) ->
+        ;  exists_file(MasFileSpec) ->
            compile(MasFileSpec)
         ).
 
@@ -985,9 +992,9 @@ reload_library_file(File) :-
 	atom_concat(PathSlash, File, PathSlashFileSpec),
 	atom_concat(PathSlashFileSpec, '.mas', MasFileSpec),
 	atom_concat(PathSlashFileSpec, '.fit.mas', MasFitFileSpec),
-        (  file_exists(MasFitFileSpec) ->
+        (  exists_file(MasFitFileSpec) ->
            compile(MasFitFileSpec)
-        ;  file_exists(MasFileSpec) ->
+        ;  exists_file(MasFileSpec) ->
            compile(MasFileSpec)
         ),
 	!.
@@ -1022,9 +1029,9 @@ find_file(library(File), FileName) :-
 
 find_file(FileSpec, FileName) :-
 	atom_concat(FileSpec,'.fit',FitFileSpec),
-        (  file_exists(FitFileSpec) ->
+        (  exists_file(FitFileSpec) ->
            FileName = FitFileSpec
-        ;  file_exists(FileSpec) ->
+        ;  exists_file(FileSpec) ->
               FileName = FileSpec
         ).
 
@@ -1033,9 +1040,9 @@ find_library_file(File, FileName) :-
 	atom_concat(Path,'/',Path2),
 	atom_concat(Path2,File,FileSpec),
 	atom_concat(FileSpec,'.fit',FitFileSpec),
-        (  file_exists(FitFileSpec) ->
+        (  exists_file(FitFileSpec) ->
            FileName = FitFileSpec
-        ;  file_exists(FileSpec) ->
+        ;  exists_file(FileSpec) ->
                 FileName = FileSpec
         ),
         !. % first solution only
@@ -1898,7 +1905,7 @@ eliminate_hidden_features({}(X),Term) :-
 eliminate_hidden_features(X,Term) :-
 	functor(X,F,N),
         N > 0,
-        nonmember(F,[&,!,<,'$VAR']),
+        \+ member(F,[&,!,<,'$VAR']),
         !,
 	X =..[_|ArgListe],
 	eliminate_hidden_features(ArgListe,ZwErg),
@@ -2067,7 +2074,7 @@ pretty_print('$$set'(Set),Indent):-     %% WS
 pretty_print(X,Indent) :-               %% Verarbeitung eines PROLOG-Terms
 	functor(X,F,N),
 	N > 0,
-	nonmember(F,[&,!,<,'$VAR','.']),
+	\+ member(F,[&,!,<,'$VAR','.']),
 	!,
 	X =.. [_|Arg_Liste],
 	arg_status(Arg_Liste,Status_Liste),
@@ -2595,7 +2602,8 @@ make_sort_list(A,[A]).
 
 %% [matsc] misc. compatibility
 
-tab(N) :- (for(_,1,N) do write(' ')).
-
-tab(S, N) :- (for(_,1,N), param(S) do write(S, ' ')).
+% martinodb
+% tab(N) :- (for(_,1,N) do write(' ')).
+% tab(S, N) :- (for(_,1,N), param(S) do write(S, ' ')).
+% end martinodb
 

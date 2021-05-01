@@ -12,7 +12,13 @@ After loading SICStus, the interpreter must be loaded:
 
 Then the grammar must be compiled:
 
+
 ?- fit 'grammar.fit'.
+
+martinodb: No, it should be:
+fit 'g.fit'.
+end martinodb
+
 
 And finally, sentences can be parsed, for example:
 
